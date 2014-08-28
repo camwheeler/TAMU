@@ -1,0 +1,14 @@
+_ReSharper.*
+Properties/
+packages/
+build/
+obj/
+bin/
+zip/
+*.bak
+*.exe
+*.suo
+*.user
+*.cache
+*.bat
+*.parameters
