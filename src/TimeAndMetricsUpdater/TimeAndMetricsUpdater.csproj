@@ -65,6 +65,9 @@
     <NoWin32Manifest>true</NoWin32Manifest>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Autofac">
+      <HintPath>..\packages\Autofac.3.5.0\lib\net40\Autofac.dll</HintPath>
+    </Reference>
     <Reference Include="Dapper, Version=1.31.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Dapper.1.31\lib\net40\Dapper.dll</HintPath>
@@ -96,6 +99,14 @@
     <Reference Include="System.Data" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Entities\Data.cs" />
+    <Compile Include="Autofac\TamuModule.cs" />
+    <Compile Include="AutoSubmit.cs" />
+    <Compile Include="Interfaces\IData.cs" />
+    <Compile Include="Interfaces\ITrayIcon.cs" />
+    <Compile Include="Interfaces\IRunWeekly.cs" />
+    <Compile Include="Interfaces\ISyncTime.cs" />
+    <Compile Include="TimeSync.cs" />
     <Compile Include="DateTimeExtensions.cs" />
     <Compile Include="Entities\TaskTime.cs" />
     <Compile Include="OAuth2.cs" />
@@ -113,7 +124,6 @@
     <Content Include="alarm.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="Resources\alarm.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
