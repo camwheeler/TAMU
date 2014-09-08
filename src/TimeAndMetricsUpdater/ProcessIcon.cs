@@ -169,23 +169,17 @@ namespace TimeAndMetricsUpdater
         }
 
         private static WorksheetEntry GetPreviousSheet(WorksheetFeed feed) {
-            var currentMonth = DateTime.Now.Month;
-            var currentDay = DateTime.Now.Day;
-
-            var previousEntry = new WorksheetEntry();
-            foreach (var entry in feed.Entries) {
-                if (entry.Title.Text.Contains(".")) {
-                    var month = Int32.Parse(entry.Title.Text.Substring(0, entry.Title.Text.IndexOf(".")));
-                    var day = Int32.Parse(entry.Title.Text.Substring(entry.Title.Text.IndexOf(".") + 1));
-                    if (month == currentMonth)
-                        if (day >= currentDay)
-                            return previousEntry;
-                    if (month > currentMonth)
-                        return previousEntry;
-                    previousEntry = (WorksheetEntry)entry;
-                }
+            var previousSaturday = DateTime.Now.AddDays(-7);
+            while (previousSaturday.DayOfWeek != DayOfWeek.Saturday)
+            {
+                previousSaturday = previousSaturday.AddDays(1);
             }
-            throw new Exception("Can't find the previous page!");
+
+            var previousEntry = feed.Entries.SingleOrDefault(e => e.Title.Text == string.Format("{0}.{1}", previousSaturday.Month, previousSaturday.Day));
+            if(previousEntry == null)
+                throw new Exception("Can't find the previous page!");
+
+            return (WorksheetEntry)previousEntry;
         }
 
         private static void Exit(object sender, EventArgs e) {
