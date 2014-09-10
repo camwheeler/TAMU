@@ -7,6 +7,5 @@ namespace TimeAndMetricsUpdater
     public interface ITrayIcon : IDisposable
     {
         void Display();
-        void Exit();
     }
 }

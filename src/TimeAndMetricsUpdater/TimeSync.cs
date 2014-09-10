@@ -51,6 +51,10 @@ namespace TimeAndMetricsUpdater.Autofac
             }
         }
 
+        public void InsertTime(object sender, EventArgs e){
+            InsertTime();
+        }
+
         private static CellEntry GetMatchingCell(string cellContents, List<CellEntry> cells) {
             var entry = new CellEntry();
             Parallel.ForEach(cells.AsParallel(), (cell, loopState) => {
@@ -104,6 +108,10 @@ namespace TimeAndMetricsUpdater.Autofac
                 var existingTasks = connection.Query<TaskList>("select Id, Name from Tasks").ToList();
                 connection.Insert(data.Tasks.Where(t => existingTasks.All(e => e.Name != t.Name)));
             }
+        }
+
+        public void UpdateCategories(object sender, EventArgs e){
+            UpdateCategories();
         }
 
         private static WorksheetEntry GetCurrentSheet(WorksheetFeed feed) {
