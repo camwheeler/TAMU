@@ -2,40 +2,40 @@
 using System.Windows.Forms;
 using Autofac;
 using Quartz;
-using Quartz.Spi;
 using TimeAndMetricsUpdater.Autofac;
 
 namespace TimeAndMetricsUpdater
 {
     public class Program
     {
-        static void Main(string[] args) {
+        private static void Main(string[] args){
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            
             var builder = new ContainerBuilder();
             builder.RegisterModule<TamuModule>();
             var container = builder.Build();
-            var scheduler = container.Resolve<IScheduler>();
-            scheduler.Start();
-            
-            var job = JobBuilder.Create<AutoSubmit>()
-                .WithIdentity("AutoInsert", "Weekly")
-                .Build();
+            using (var scope = container.BeginLifetimeScope()){
 
-            var trigger = TriggerBuilder.Create()
-                .WithIdentity("InsertTime", "Weekly")
-                .StartNow()
-                .WithSchedule(CronScheduleBuilder.WeeklyOnDayAndHourAndMinute(DayOfWeek.Monday, 0, 1))
-                .Build();
+                var job = JobBuilder.Create<AutoSubmit>()
+                    .WithIdentity("AutoInsert", "Weekly")
+                    .Build();
 
-            scheduler.ScheduleJob(job, trigger);
+                var trigger = TriggerBuilder.Create()
+                    .WithIdentity("InsertTime", "Weekly")
+                    .WithSchedule(CronScheduleBuilder.WeeklyOnDayAndHourAndMinute(DayOfWeek.Monday, 0, 1))
+                    .Build();
 
-            var asfd = trigger.GetNextFireTimeUtc();
+                var scheduler = scope.Resolve<IScheduler>();
+                scheduler.ScheduleJob(job, trigger);
+                scheduler.Start();
 
-            using (var pi = container.Resolve<ITrayIcon>()){
-                pi.Display();
+                using (var pi = scope.Resolve<ITrayIcon>()){
+                    pi.Display();
 
-                Application.Run();
+                    Application.Run();
+                }
+                scheduler.Shutdown();
             }
         }
     }

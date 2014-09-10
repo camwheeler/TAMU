@@ -1,5 +1,4 @@
-﻿using System;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
 using Quartz;
 
 namespace TimeAndMetricsUpdater
@@ -13,8 +12,7 @@ namespace TimeAndMetricsUpdater
         }
 
         public void Execute(IJobExecutionContext context){
-            //sync.InsertTime();
-            MessageBox.Show("Job triggered.", "TAMU", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            sync.InsertTime();
         }
     }
 }

@@ -20,7 +20,7 @@ namespace TimeAndMetricsUpdater.Autofac
             this.projectTime = projectTime;
         }
 
-        public void InsertTime() { //InsertTime()bject sender, EventArgs eventArgs) {
+        public void InsertTime() { 
             using (var connection = new SqlCeConnection(data.User.GrindstoneDB)) {
                 var endTime = DateTime.Now.StartOfWeek(DayOfWeek.Sunday);
                 var startTime = endTime.AddDays(-7);
@@ -66,12 +66,10 @@ namespace TimeAndMetricsUpdater.Autofac
             return entry;
         }
 
-        public void UpdateCategories() { //UpdateCategories(object sender, EventArgs eventArgs) {
+        public void UpdateCategories() { 
             data.Tasks = new List<TaskList>();
 
             // Make the request to Google
-            // See other portions of this guide for code to put here...
-
             var query = new SpreadsheetQuery();
             var feed = projectTime.Query(query);
             var spreadsheet = (SpreadsheetEntry)feed.Entries.Single(f => f.Title.Text == "project time & metrics 2014");
@@ -105,7 +103,7 @@ namespace TimeAndMetricsUpdater.Autofac
             }
 
             using (var connection = new SqlCeConnection(data.User.GrindstoneDB)) {
-                var existingTasks = connection.Query<TaskList>("select Id, Name from Tasks").ToList();
+                var existingTasks = connection.Query<TaskList>("select Id, Name from Tasks") ?? new List<TaskList>();
                 connection.Insert(data.Tasks.Where(t => existingTasks.All(e => e.Name != t.Name)));
             }
         }
@@ -133,23 +131,16 @@ namespace TimeAndMetricsUpdater.Autofac
         }
 
         private static WorksheetEntry GetPreviousSheet(WorksheetFeed feed) {
-            var currentMonth = DateTime.Now.Month;
-            var currentDay = DateTime.Now.Day;
-
-            var previousEntry = new WorksheetEntry();
-            foreach (var entry in feed.Entries) {
-                if (entry.Title.Text.Contains(".")) {
-                    var month = Int32.Parse(entry.Title.Text.Substring(0, entry.Title.Text.IndexOf(".")));
-                    var day = Int32.Parse(entry.Title.Text.Substring(entry.Title.Text.IndexOf(".") + 1));
-                    if (month == currentMonth)
-                        if (day >= currentDay)
-                            return previousEntry;
-                    if (month > currentMonth)
-                        return previousEntry;
-                    previousEntry = (WorksheetEntry)entry;
-                }
+            var previousSaturday = DateTime.Now.AddDays(-7);
+            while (previousSaturday.DayOfWeek != DayOfWeek.Saturday)
+            {
+                previousSaturday = previousSaturday.AddDays(1);
             }
-            throw new Exception("Can't find the previous page!");
+            var previousEntry = feed.Entries.SingleOrDefault(e => e.Title.Text == string.Format("{0}.{1}", previousSaturday.Month, previousSaturday.Day));
+            if(previousEntry == null)
+                throw new Exception("Can't find the previous page!");
+
+            return (WorksheetEntry)previousEntry;
         }
     }
 }
