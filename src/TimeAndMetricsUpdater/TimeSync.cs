@@ -22,32 +22,35 @@ namespace TimeAndMetricsUpdater.Autofac
 
         public void InsertTime() { 
             using (var connection = new SqlCeConnection(data.User.GrindstoneDB)) {
-                var endTime = DateTime.Now.StartOfWeek(DayOfWeek.Sunday);
-                var startTime = endTime.AddDays(-7);
-                var result = connection.Query<TaskTime>("select TaskId, Name, Start, [End] from Tasks,Times where Times.TaskId = Tasks.Id and Start > @TwoSundaysAgo and [End] < @LastSunday", new { TwoSundaysAgo = startTime, LastSunday = endTime }).ToList();
+                try{
+                    var endTime = DateTime.Now.StartOfWeek(DayOfWeek.Sunday);
+                    var startTime = endTime.AddDays(-7);
+                    var result = connection.Query<TaskTime>("select TaskId, Name, Start, [End] from Tasks,Times where Times.TaskId = Tasks.Id and Start > @TwoSundaysAgo and [End] < @LastSunday", new {TwoSundaysAgo = startTime, LastSunday = endTime}).ToList();
 
-                var elapsed = result.GroupBy(r => r.Name).Select(g => new { Name = g.First().Name, TotalTime = new TimeSpan(g.Sum(s => s.Elapsed.Ticks)) });
+                    var elapsed = result.GroupBy(r => r.Name).Select(g => new {Name = g.First().Name, TotalTime = new TimeSpan(g.Sum(s => s.Elapsed.Ticks))});
 
 
-                var query = new SpreadsheetQuery();
-                var feed = projectTime.Query(query);
-                var spreadsheet = (SpreadsheetEntry)feed.Entries.Single(f => f.Title.Text == "project time & metrics 2014");
-                var worksheet = GetPreviousSheet(spreadsheet.Worksheets);
-                var cellQuery = new CellQuery(worksheet.CellFeedLink) {
-                    MaximumColumn = 12,
-                    MinimumRow = 11,
-                    ReturnEmpty = ReturnEmptyCells.yes
-                };
-                var cells = projectTime.Query(cellQuery).Entries.Select(c => (CellEntry)c).ToList();
+                    var query = new SpreadsheetQuery();
+                    var feed = projectTime.Query(query);
+                    var spreadsheet = (SpreadsheetEntry) feed.Entries.Single(f => f.Title.Text == "project time & metrics 2014");
+                    var worksheet = GetPreviousSheet(spreadsheet.Worksheets);
+                    var cellQuery = new CellQuery(worksheet.CellFeedLink) {
+                        MaximumColumn = 12,
+                        MinimumRow = 11,
+                        ReturnEmpty = ReturnEmptyCells.yes
+                    };
+                    var cells = projectTime.Query(cellQuery).Entries.Select(c => (CellEntry) c).ToList();
 
-                var myCell = GetMatchingCell(data.User.Name, cells);
-                foreach (var item in elapsed) {
-                    var row = GetMatchingCell(item.Name, cells).Row;
-                    var cell = cells.Single(c => c.Row == row && c.Column == myCell.Column);
-                    cell.InputValue = item.TotalTime.TotalHours.ToString("0.0");
-                    cell.Update();
+                    var myCell = GetMatchingCell(data.User.Name, cells);
+                    foreach (var item in elapsed){
+                        var row = GetMatchingCell(item.Name, cells).Row;
+                        var cell = cells.Single(c => c.Row == row && c.Column == myCell.Column);
+                        cell.InputValue = item.TotalTime.TotalHours.ToString("0.0");
+                        cell.Update();
+                    }
                 }
-
+                catch (Exception ex) { }
+                UpdateCategories();
             }
         }
 
@@ -104,6 +107,11 @@ namespace TimeAndMetricsUpdater.Autofac
 
             using (var connection = new SqlCeConnection(data.User.GrindstoneDB)) {
                 var existingTasks = connection.Query<TaskList>("select Id, Name from Tasks") ?? new List<TaskList>();
+                var deleteme = existingTasks.Where(e => !data.Tasks.Select(d => d.Name).Contains(e.Name)).ToList();
+                deleteme.ForEach(d =>{
+                    connection.Execute("delete Times where TaskId = @Id", new{d.Id});
+                    connection.Delete(d);
+                });
                 connection.Insert(data.Tasks.Where(t => existingTasks.All(e => e.Name != t.Name)));
             }
         }
