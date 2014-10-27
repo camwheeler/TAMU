@@ -15,7 +15,7 @@ namespace TimeAndMetricsUpdater
         }
 
         public void Display() {
-            ToolStripItem toolStripUpdateCategories = new ToolStripMenuItem("Update Categories");
+            ToolStripItem toolStripUpdateCategories = new ToolStripMenuItem("Update Categories (Destructive)");
             toolStripUpdateCategories.Click += sync.UpdateCategories;
 
             ToolStripItem toolStripInsertTime = new ToolStripMenuItem("Insert Last Week's Time");
