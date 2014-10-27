@@ -34,8 +34,8 @@ namespace TimeAndMetricsUpdater.Autofac {
                 .As<IData>()
                 .SingleInstance()
                 .OnActivated(data =>{
-                    if (!Directory.Exists(appData))
-                        Directory.CreateDirectory(appData);
+                    if (!Directory.Exists(tamuData))
+                        Directory.CreateDirectory(tamuData);
                     File.WriteAllText(tamuDataUser, JsonConvert.SerializeObject(data.Instance.User));
                 });
         }
