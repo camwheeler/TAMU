@@ -28,7 +28,8 @@ namespace TimeAndMetricsUpdater.Autofac {
                 new Data {
                     User = new UserInfo {
                         Name = Interaction.InputBox("Enter your name as it appears in the Time and Metrics sheet", "Time and Metrics Sync: User Name"),
-                        GrindstoneDB = string.Format("Data Source={0};Persist Security Info=False;", Interaction.InputBox("Enter the path to your Grindstone 3 database.", "Time and Metrics Sync: DB Path", string.Format(@"{0}\Databases\Grindstone3.gsdb", appData)))
+                        GrindstoneDB = string.Format("Data Source={0};Persist Security Info=False;", Interaction.InputBox("Enter the path to your Grindstone 3 database.", "Time and Metrics Sync: DB Path", string.Format(@"{0}\Databases\Grindstone3.gsdb", appData))),
+                        SheetName = "project time & metrics 2015"
                     }
                 })
                 .As<IData>()

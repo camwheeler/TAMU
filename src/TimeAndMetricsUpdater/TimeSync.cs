@@ -32,7 +32,7 @@ namespace TimeAndMetricsUpdater.Autofac
 
                     var query = new SpreadsheetQuery();
                     var feed = projectTime.Query(query);
-                    var spreadsheet = (SpreadsheetEntry) feed.Entries.Single(f => f.Title.Text == "project time & metrics 2014");
+                    var spreadsheet = (SpreadsheetEntry) feed.Entries.Single(f => f.Title.Text == data.User.SheetName);
                     var worksheet = GetPreviousSheet(spreadsheet.Worksheets);
                     var cellQuery = new CellQuery(worksheet.CellFeedLink) {
                         MaximumColumn = 12,
@@ -75,12 +75,13 @@ namespace TimeAndMetricsUpdater.Autofac
             // Make the request to Google
             var query = new SpreadsheetQuery();
             var feed = projectTime.Query(query);
-            var spreadsheet = (SpreadsheetEntry)feed.Entries.Single(f => f.Title.Text == "project time & metrics 2014");
+            var spreadsheet = (SpreadsheetEntry)feed.Entries.Single(f => f.Title.Text == data.User.SheetName);
             var worksheet = GetCurrentSheet(spreadsheet.Worksheets);
-            var cellQuery = new CellQuery(worksheet.CellFeedLink);
-            cellQuery.MaximumColumn = 1;
-            cellQuery.MinimumRow = 11;
-            cellQuery.ReturnEmpty = ReturnEmptyCells.no;
+            var cellQuery = new CellQuery(worksheet.CellFeedLink) {
+                MaximumColumn = 1, 
+                MinimumRow = 11, 
+                ReturnEmpty = ReturnEmptyCells.no
+            };
             var cells = projectTime.Query(cellQuery).Entries.Select(c => (CellEntry)c).ToList();
 
             var categories = new List<string>() { 
